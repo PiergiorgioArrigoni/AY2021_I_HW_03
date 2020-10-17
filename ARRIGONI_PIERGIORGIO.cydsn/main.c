@@ -9,7 +9,7 @@
 #include "Timer_InterruptRoutine.h"
 
 uint8_t flag_uart = 0; //flag of the UART interrupt (goes to 1 if one byte of data is received)
-uint8_t flag_timer = 0; //flag of the timer interrupt (goes to 1 if timer completes a 5 s cycle)
+uint8_t flag_timer = 0; //flag of the timer interrupt (goes to 1 if timer completes a 5 seconds cycle)
 
 int main(void)
 {
@@ -22,9 +22,9 @@ int main(void)
     CyGlobalIntEnable;
     ISR_UART_StartEx(UART_ISR); //enable UART interrupt
     
-    uint8_t flag_complete = 0; //flag signaling packet transmission completed
+    uint8_t flag_complete = 0; //flag signaling the conslusion of the packet transmission
     uint8_t received;
-    uint8_t rgb[3]; //vector storing duty cycles of the PWMs
+    uint8_t rgb[3]; //vector storing the duty cycles of the PWMs
 
     for(;;)
     {
@@ -36,16 +36,18 @@ int main(void)
             {
                 Timer_Init(); //reset timer
                 ISR_Timer_StartEx(Timer_ISR); //enable timer interrupt
+                UART_PutString("\nHeader byte received.\nInsert red value.\n");
                 
                 for(;;)
                 {
-                    if(flag_timer || flag_complete) //for cycles are broken by the timer interrupt or by the ending of the transmission
+                    if(flag_timer || flag_complete) //for cycles are broken by the timer interrupt or by the conclusion of the transmission
                         break;
                     if(flag_uart)
                     {
                         flag_uart = 0;
                         rgb[0] = UART_ReadRxData(); //red value
                         Timer_Init();
+                        UART_PutString("Insert green value.\n");
                         
                         for(;;)
                         {
@@ -56,6 +58,7 @@ int main(void)
                                 flag_uart = 0;
                                 rgb[1] = UART_ReadRxData(); //green value
                                 Timer_Init();
+                                UART_PutString("Insert blue value.\n");
                                 
                                 for(;;)
                                 {
@@ -66,6 +69,7 @@ int main(void)
                                         flag_uart = 0;
                                         rgb[2] = UART_ReadRxData(); //blue value
                                         Timer_Init();
+                                        UART_PutString("Waiting for tail byte...\n");
                                         
                                         for(;;)
                                         {
@@ -77,7 +81,7 @@ int main(void)
                                                 received = UART_ReadRxData();
                                                 if(received == 0xC0) //tail byte
                                                 {
-                                                    flag_complete = 1; //ending of the transmission
+                                                    flag_complete = 1; //conclusion of the transmission
                                                     break;
                                                 }
                                             }
@@ -90,14 +94,19 @@ int main(void)
                 }
                 
                 ISR_Timer_Stop(); //disable timer interrupt
-                flag_timer = 0;
+                if(flag_timer)
+                {
+                    flag_timer = 0;
+                    UART_PutString("\nTimeout.\nReturning to IDLE state.\n");
+                }   
                 
                 if(flag_complete) //if transmission was successful
                 {   
                     flag_complete = 0;
-                    Red_PWM_WriteCompare(rgb[0]);
-                    Green_PWM_WriteCompare(rgb[1]);
-                    Blue_PWM_WriteCompare(rgb[2]);
+                    UART_PutString("\nTransmission complete.\nDisplaying color.\n");
+                    Red_PWM_WriteCompare(255-rgb[0]);
+                    Green_PWM_WriteCompare(255-rgb[1]);
+                    Blue_PWM_WriteCompare(255-rgb[2]);
                 }        
             }
             else if(received == 'v')

@@ -1,6 +1,6 @@
 /**
  * \file InterruptRoutine.c
- * \brief Source file for UART Interrupt Routine
+ * \brief Source file for Timer Interrupt Routine
  * \author Piergiorgio Arrigoni
 */
 
