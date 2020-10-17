@@ -25,6 +25,8 @@ int main(void)
     uint8_t flag_complete = 0; //flag signaling the conslusion of the packet transmission
     uint8_t received;
     uint8_t rgb[3]; //vector storing the duty cycles of the PWMs
+    
+    UART_PutString("IDLE state.\n"); //system starts at idle state
 
     for(;;)
     {
@@ -36,7 +38,7 @@ int main(void)
             {
                 Timer_Init(); //reset timer
                 ISR_Timer_StartEx(Timer_ISR); //enable timer interrupt
-                UART_PutString("\nHeader byte received.\nInsert red value.\n");
+                UART_PutString("\nHeader byte received.\nWaiting for red value.\n");
                 
                 for(;;)
                 {
@@ -47,7 +49,7 @@ int main(void)
                         flag_uart = 0;
                         rgb[0] = UART_ReadRxData(); //red value
                         Timer_Init();
-                        UART_PutString("Insert green value.\n");
+                        UART_PutString("Waiting for green value.\n");
                         
                         for(;;)
                         {
@@ -58,7 +60,7 @@ int main(void)
                                 flag_uart = 0;
                                 rgb[1] = UART_ReadRxData(); //green value
                                 Timer_Init();
-                                UART_PutString("Insert blue value.\n");
+                                UART_PutString("Waiting for blue value.\n");
                                 
                                 for(;;)
                                 {
@@ -69,7 +71,7 @@ int main(void)
                                         flag_uart = 0;
                                         rgb[2] = UART_ReadRxData(); //blue value
                                         Timer_Init();
-                                        UART_PutString("Waiting for tail byte...\n");
+                                        UART_PutString("Waiting for tail byte.\n");
                                         
                                         for(;;)
                                         {
@@ -103,10 +105,10 @@ int main(void)
                 if(flag_complete) //if transmission was successful
                 {   
                     flag_complete = 0;
-                    UART_PutString("\nTransmission complete.\nDisplaying color.\n");
-                    Red_PWM_WriteCompare(255-rgb[0]);
-                    Green_PWM_WriteCompare(255-rgb[1]);
-                    Blue_PWM_WriteCompare(255-rgb[2]);
+                    UART_PutString("\nTransmission complete.\nDisplaying color.\nReturning to IDLE state.\n");
+                    Red_PWM_WriteCompare(rgb[0]);
+                    Green_PWM_WriteCompare(rgb[1]);
+                    Blue_PWM_WriteCompare(rgb[2]);
                 }        
             }
             else if(received == 'v')
