@@ -6,8 +6,6 @@
 
 #include "Timer_InterruptRoutine.h"
 
-uint8_t flag_timer;
-
 CY_ISR(Timer_ISR)
 {
     flag_timer = 1;
