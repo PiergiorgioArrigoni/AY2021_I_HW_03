@@ -8,7 +8,7 @@
 #include "UART_InterruptRoutine.h"
 #include "Timer_InterruptRoutine.h"
 
-#define PERIOD 250 //period of the timer (cooresponding to 5 seconds)
+#define PERIOD 250 //period of the timer (corresponding to 5 seconds)
 
 uint8_t flag_uart = 0; //flag of the UART interrupt (goes to 1 if one byte of data is received)
 uint8_t flag_timer = 0; //flag of the timer interrupt (goes to 1 if timer completes a 5 seconds cycle)
@@ -22,13 +22,15 @@ int main(void)
     Green_PWM_Start();
     Blue_PWM_Start();
 
+    //enable interrupts
     CyGlobalIntEnable;
-    ISR_UART_StartEx(UART_ISR); //enable UART interrupt
+    ISR_UART_StartEx(UART_ISR);
+    ISR_Timer_StartEx(Timer_ISR);
     
     uint8_t flag_complete = 0; //flag signaling the conslusion of the packet transmission
     uint8_t flag_error = 0; //flag signaling a error in transmission (wrong tyle byte)
     uint8_t received;
-    uint8_t rgb[3]; //vector storing the duty cycles of the PWMs
+    uint8_t rgb[3]; //vector storing the duty cycles of the PWMs ranging from 0 to 255 (i.e. from 0% to 100%)
     
     UART_PutString("IDLE state.\n"); //system starts in idle state
 
@@ -40,7 +42,6 @@ int main(void)
             received = UART_ReadRxData();
             if(received == 0xA0) //header byte
             {
-                ISR_Timer_StartEx(Timer_ISR); //enable timer interrupt
                 flag_timer = 0;
                 Timer_Stop();
                 Timer_WriteCounter(PERIOD); //reset timer counter
@@ -94,7 +95,7 @@ int main(void)
                                             {
                                                 flag_uart = 0;
                                                 received = UART_ReadRxData();
-                                                if(!(received == 0xC0)) //not tail byte
+                                                if(!(received == 0xC0)) //wrong tail byte
                                                     flag_error = 1;
                                                 flag_complete = 1; //conclusion of the transmission
                                                 break;
@@ -107,19 +108,18 @@ int main(void)
                     }
                 }
                 
-                ISR_Timer_Stop(); //disable timer interrupt
-                if(flag_timer)
+                if(flag_timer) //5 seconds passed between two bytes, trasmission was stopped
                 {
                     flag_timer = 0;
                     UART_PutString("\nTimeout.\nReturning to IDLE state.\n");
                 }   
-                else if(flag_error)
+                else if(flag_error) //transmission was corrupted
                 {
                     flag_error = 0;
                     flag_complete = 0;
                     UART_PutString("\nAn error occured in the transmission: wrong tail byte.\nReturning to IDLE state.\n");
                 }
-                else //transmission was successful
+                else //transmission was successful, updating duty cycles of the PWMs
                 {   
                     flag_complete = 0;
                     Red_PWM_WriteCompare(rgb[0]);
