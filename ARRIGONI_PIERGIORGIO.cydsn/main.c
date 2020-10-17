@@ -5,20 +5,91 @@
 */
 
 #include "project.h"
+#include "InterruptRoutine.h"
+
+uint8_t flag = 0;
+uint8_t flag_timer = 0;
 
 int main(void)
 {
     //initialize components
-    Timer_Start();
     UART_Start();
+    Timer_Start();
     Red_PWM_Start();
     Green_PWM_Start();
     
+    //enable UART interrupt
     CyGlobalIntEnable;
-    ISR_UART_StartEx(UART_ISR); //enable UART interrupt
+    ISR_UART_StartEx(UART_ISR);
+    
+    uint8_t flag_complete;
+    uint8_t received;
+    uint8_t rgb[3];
 
     for(;;)
     {
+        if(flag)
+        {   
+            flag = 0;
+            received = UART_ReadRxData();
+            if(received == 0xA0){
+                //timer reset
+                for(;;)
+                {
+                    if(flag_timer || flag_complete)
+                        break;
+                    if(flag)
+                    {
+                        flag = 0;
+                        rgb[0] = UART_ReadRxData(); //red value
+                        //timer reset
+                        for(;;)
+                        {
+                            if(flag_timer || flag_complete)
+                                break;
+                            if(flag)
+                            {
+                                flag = 0;
+                                rgb[1] = UART_ReadRxData(); //green value
+                                //timer reset
+                                for(;;)
+                                {
+                                    if(flag_timer || flag_complete)
+                                        break;
+                                    if(flag)
+                                    {
+                                        flag = 0;
+                                        rgb[2] = UART_ReadRxData(); //blue value
+                                        //timer reset
+                                        for(;;)
+                                        {
+                                            if(flag_timer)
+                                                break;
+                                            if(flag)
+                                            {
+                                                flag = 0;
+                                                received = UART_ReadRxData();
+                                                if(received == 0xC0){
+                                                    flag_complete = 1;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                flag_timer = 0;
+                
+                if(flag_complete)
+                {
+                    
+            }
+            else if(received == 'v')
+                UART_PutString("RGB LED Program $$$");               
+        }
     }
 }
 
