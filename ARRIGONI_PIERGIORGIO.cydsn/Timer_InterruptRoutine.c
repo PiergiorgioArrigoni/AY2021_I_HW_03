@@ -4,14 +4,13 @@
  * \author Piergiorgio Arrigoni
 */
 
-#include "InterruptRoutine.h"
+#include "Timer_InterruptRoutine.h"
 
-uint8_t flag;
+uint8_t flag_timer;
 
-CY_ISR(UART_ISR)
+CY_ISR(Timer_ISR)
 {
-    if(UART_ReadRxStatus() == UART_RX_STS_FIFO_NOTEMPTY)
-        flag = 1;
+    flag_timer = 1;
 }
 
 /* [] END OF FILE */
