@@ -251,8 +251,10 @@
   <Data key="DataVersionKey" value="2" />
   <Group key="DWRInstGuidMapping">
     <Group key="Pin">
+      <Data key="2bb81d0d-e949-49d4-8103-10dde8ff298e" value="UART_TX" />
       <Data key="9c72960c-f323-4556-8e73-f553df8e865f" value="Blue_LED" />
       <Data key="55e338a8-1684-4cbb-a915-340bdc3de6b3" value="Green_LED" />
+      <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="UART_RX" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="Red_LED" />
     </Group>
   </Group>
@@ -3340,6 +3342,11 @@
     </Group>
   </Group>
   <Group key="Pin2">
+    <Group key="2bb81d0d-e949-49d4-8103-10dde8ff298e">
+      <Group key="0">
+        <Data key="Port Format" value="12,7" />
+      </Group>
+    </Group>
     <Group key="9c72960c-f323-4556-8e73-f553df8e865f">
       <Group key="0">
         <Data key="Port Format" value="2,5" />
@@ -3348,6 +3355,11 @@
     <Group key="55e338a8-1684-4cbb-a915-340bdc3de6b3">
       <Group key="0">
         <Data key="Port Format" value="2,6" />
+      </Group>
+    </Group>
+    <Group key="1425177d-0d0e-4468-8bcc-e638e5509a9b">
+      <Group key="0">
+        <Data key="Port Format" value="12,6" />
       </Group>
     </Group>
     <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">
