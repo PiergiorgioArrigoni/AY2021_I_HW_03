@@ -8,7 +8,14 @@
 
 int main(void)
 {
+    //initialize components
+    Timer_Start();
+    UART_Start();
+    Red_PWM_Start();
+    Green_PWM_Start();
+    
     CyGlobalIntEnable;
+    ISR_UART_StartEx(UART_ISR); //enable UART interrupt
 
     for(;;)
     {
