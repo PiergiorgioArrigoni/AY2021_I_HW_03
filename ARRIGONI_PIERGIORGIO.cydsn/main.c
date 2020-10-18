@@ -32,7 +32,7 @@ int main(void)
     uint8_t received;
     uint8_t rgb[3]; //vector storing the duty cycles of the PWMs ranging from 0 to 255 (i.e. from 0% to 100%)
     
-    UART_PutString("IDLE state.\n"); //system starts in idle state
+    //UART_PutString("IDLE state.\n"); //system starts in idle state, with LEDs off
 
     for(;;)
     {
@@ -46,7 +46,7 @@ int main(void)
                 Timer_Stop();
                 Timer_WriteCounter(PERIOD); //reset timer counter
                 Timer_Enable();
-                UART_PutString("\nHeader byte received.\nWaiting for red value.\n");
+                //UART_PutString("\nHeader byte received.\nWaiting for red value.\n");
                 
                 for(;;)
                 {
@@ -59,7 +59,7 @@ int main(void)
                         Timer_Stop();
                         Timer_WriteCounter(PERIOD);
                         Timer_Enable();
-                        UART_PutString("Waiting for green value.\n");
+                        //UART_PutString("Waiting for green value.\n");
                         
                         for(;;)
                         {
@@ -72,7 +72,7 @@ int main(void)
                                 Timer_Stop();
                                 Timer_WriteCounter(PERIOD);
                                 Timer_Enable();
-                                UART_PutString("Waiting for blue value.\n");
+                                //UART_PutString("Waiting for blue value.\n");
                                 
                                 for(;;)
                                 {
@@ -85,7 +85,7 @@ int main(void)
                                         Timer_Stop();
                                         Timer_WriteCounter(PERIOD);
                                         Timer_Enable();
-                                        UART_PutString("Waiting for tail byte.\n");
+                                        //UART_PutString("Waiting for tail byte.\n");
                                         
                                         for(;;)
                                         {
@@ -111,13 +111,13 @@ int main(void)
                 if(flag_timer) //5 seconds passed between two bytes, trasmission was stopped
                 {
                     flag_timer = 0;
-                    UART_PutString("\nTimeout.\nReturning to IDLE state.\n");
+                    //UART_PutString("\nTimeout.\nReturning to IDLE state.\n");
                 }   
                 else if(flag_error) //transmission was corrupted
                 {
                     flag_error = 0;
                     flag_complete = 0;
-                    UART_PutString("\nAn error occured in the transmission: wrong tail byte.\nReturning to IDLE state.\n");
+                    //UART_PutString("\nAn error occured in the transmission: wrong tail byte.\nReturning to IDLE state.\n");
                 }
                 else //transmission was successful, updating duty cycles of the PWMs
                 {   
@@ -125,11 +125,11 @@ int main(void)
                     Red_PWM_WriteCompare(rgb[0]);
                     Green_PWM_WriteCompare(rgb[1]);
                     Blue_PWM_WriteCompare(rgb[2]);
-                    UART_PutString("\nTransmission complete.\nDisplaying color.\nReturning to IDLE state.\n");
+                    //UART_PutString("\nTransmission complete.\nDisplaying color.\nReturning to IDLE state.\n");
                 }        
             }
             else if(received == 'v')
-                UART_PutString("RGB LED Program $$$"); //connection command          
+                UART_PutString("RGB LED Program $$$"); //connection command for Kivy GUI      
         }
     }
 }

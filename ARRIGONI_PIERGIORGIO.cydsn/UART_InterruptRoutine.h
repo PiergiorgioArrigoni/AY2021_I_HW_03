@@ -9,8 +9,6 @@
     
     #include "project.h"
     
-    extern uint8_t flag_uart;
-    
     CY_ISR_PROTO(UART_ISR);
 #endif
 

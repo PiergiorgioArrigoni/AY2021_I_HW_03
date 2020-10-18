@@ -9,8 +9,6 @@
     
     #include "project.h"
     
-    extern uint8_t flag_timer;
-    
     CY_ISR_PROTO(Timer_ISR);
 #endif
 
