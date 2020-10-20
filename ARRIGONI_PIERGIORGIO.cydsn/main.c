@@ -16,11 +16,11 @@ uint8_t flag_timer = 0; //flag of the timer interrupt (goes to 1 if timer comple
 int main(void)
 {
     //initialize components
-    UART_Start();
-    Timer_Start();
     Red_PWM_Start();
     Green_PWM_Start();
     Blue_PWM_Start();
+    UART_Start();
+    Timer_Start();
 
     //enable interrupts
     CyGlobalIntEnable;
@@ -32,17 +32,19 @@ int main(void)
     uint8_t received;
     uint8_t rgb[3]; //vector storing the duty cycles of the PWMs ranging from 0 to 255 (i.e. from 0% to 100%)
     
-    //UART_PutString("IDLE state.\n"); //system starts in idle state, with LEDs off
+    /* NOTE: UART_Putstring function has been used to debug the code with CoolTerm by inserting bytes one by one,
+    some of its instances were left as comments because they do not let the Kivy Gui work correctly */
+    UART_PutString("IDLE state.\n"); //system starts in idle state, with LEDs off
 
     for(;;)
     {
         if(flag_uart)
         {   
-            flag_uart = 0; //same flag is then reused 
+            flag_uart = 0; //flag is reset and then reused 
             received = UART_ReadRxData();
             if(received == 0xA0) //header byte
             {
-                flag_timer = 0;
+                flag_timer = 0; //reset timer flag if transmission started
                 Timer_Stop();
                 Timer_WriteCounter(PERIOD); //reset timer counter
                 Timer_Enable();
@@ -109,15 +111,12 @@ int main(void)
                 }
                 
                 if(flag_timer) //5 seconds passed between two bytes, trasmission was stopped
-                {
-                    flag_timer = 0;
-                    //UART_PutString("\nTimeout.\nReturning to IDLE state.\n");
-                }   
+                    UART_PutString("\nTimeout.\nReturning to IDLE state.\n");
                 else if(flag_error) //transmission was corrupted
                 {
                     flag_error = 0;
                     flag_complete = 0;
-                    //UART_PutString("\nAn error occured in the transmission: wrong tail byte.\nReturning to IDLE state.\n");
+                    UART_PutString("\nAn error occured in the transmission: wrong tail byte.\nReturning to IDLE state.\n");
                 }
                 else //transmission was successful, updating duty cycles of the PWMs
                 {   
@@ -125,7 +124,7 @@ int main(void)
                     Red_PWM_WriteCompare(rgb[0]);
                     Green_PWM_WriteCompare(rgb[1]);
                     Blue_PWM_WriteCompare(rgb[2]);
-                    //UART_PutString("\nTransmission complete.\nDisplaying color.\nReturning to IDLE state.\n");
+                    UART_PutString("\nTransmission complete. Displaying color.\nReturning to IDLE state.\n");
                 }        
             }
             else if(received == 'v')
